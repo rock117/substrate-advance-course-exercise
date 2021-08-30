@@ -23,12 +23,15 @@ pub mod pallet {
         traits::Randomness,
     };
 
+    use frame_support::debug;
     use frame_system::pallet_prelude::*;
     use sp_core::H256;
     use sp_io::hashing::{blake2_128, blake2_256, twox_128, twox_256, twox_64};
+    use sp_runtime::print;
     use sp_runtime::traits::AtLeast32Bit;
     use sp_runtime::traits::MaybeDisplay;
     use sp_runtime::DispatchErrorWithPostInfo;
+
     /// Configure the pallet by specifying the parameters and types on which it depends.
     // #[pallet::config]
     // pub trait Config: frame_system::Config {
@@ -121,7 +124,11 @@ pub mod pallet {
             dest: T::AccountId,
             kitty_id: KittyIndex,
         ) -> DispatchResultWithPostInfo {
-            let sender = ensure_signed(origin)?;
+            let sender: T::AccountId = ensure_signed(origin)?;
+            ensure!(
+                Kitties::<T>::contains_key(kitty_id),
+                Error::<T>::KittyNotExist
+            );
             ensure!(
                 Some(sender.clone()) == Owner::<T>::get(kitty_id),
                 Error::<T>::NotKittyOwner
@@ -138,6 +145,14 @@ pub mod pallet {
             kitty2: KittyIndex,
         ) -> DispatchResultWithPostInfo {
             let sender = ensure_signed(origin)?;
+            ensure!(
+                Kitties::<T>::contains_key(kitty1),
+                Error::<T>::KittyNotExist
+            );
+            ensure!(
+                Kitties::<T>::contains_key(kitty2),
+                Error::<T>::KittyNotExist
+            );
             ensure!(kitty1 != kitty2, Error::<T>::SameParentIndex);
             let dna = Self::generate_dna_from_2kitties(sender.clone(), kitty1, kitty2)?;
             Self::create(sender, dna)
@@ -197,7 +212,7 @@ pub mod pallet {
             payload.using_encoded(blake2_128)
         }
 
-        fn create(sender: T::AccountId, dna: [u8; 16]) -> DispatchResultWithPostInfo {
+        fn create(kitty_owner: T::AccountId, dna: [u8; 16]) -> DispatchResultWithPostInfo {
             let kitty_id = match Self::kitties_count() {
                 Some(count) => {
                     ensure!(
@@ -209,8 +224,9 @@ pub mod pallet {
                 None => 1,
             };
             Kitties::<T>::insert(kitty_id, Some(Kitty(dna)));
-            Owner::<T>::insert(kitty_id, Some(sender.clone()));
-            Self::deposit_event(Event::KittyCreated(sender, kitty_id));
+            Owner::<T>::insert(kitty_id, Some(kitty_owner.clone()));
+            <KittiesCount<T>>::put(Some(kitty_id + 1));
+            Self::deposit_event(Event::KittyCreated(kitty_owner, kitty_id));
             Ok(().into())
         }
 
@@ -230,7 +246,5 @@ pub mod pallet {
             }
             Ok(dna)
         }
-
-        
     }
 }
