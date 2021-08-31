@@ -4,3 +4,4 @@
 /01/substrate-node-template/.github/workflows/build-push-template.yml
 /01/substrate-node-template/.github/workflows/check.yml
 /02/substrate-node-template/pallets/kitties/.idea
+/03/frontend/.yarn/cache/
