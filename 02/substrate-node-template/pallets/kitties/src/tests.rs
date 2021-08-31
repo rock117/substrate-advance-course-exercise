@@ -82,17 +82,6 @@ fn test_breed_kitty_failed_dueto_kitty_same_parent() {
     });
 }
 
-#[test]
-fn test_breed_kitty_failed_dueto_kitty_same_parent() {
-    new_test_ext().execute_with(|| {
-        System::set_block_number(10);
-        let parent1 = create_kitty(1);
-        assert_noop!(
-            KittiesModule::breed_kitty(Origin::signed(1), 1, 1),
-            Error::<Test>::SameParentIndex
-        );
-    });
-}
 fn create_kitty(owner: u64) -> u64 {
     KittiesModule::create_kitty(Origin::signed(owner));
     <KittiesCount<Test>>::get().unwrap() - 1
