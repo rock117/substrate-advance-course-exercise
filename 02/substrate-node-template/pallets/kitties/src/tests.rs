@@ -76,7 +76,7 @@ fn test_breed_kitty_failed_dueto_kitty_same_parent() {
         System::set_block_number(10);
         let parent1 = create_kitty(1);
         assert_noop!(
-            KittiesModule::breed_kitty(Origin::signed(1), 1, 1),
+            KittiesModule::breed_kitty(Origin::signed(1), 0, 0),
             Error::<Test>::SameParentIndex
         );
     });

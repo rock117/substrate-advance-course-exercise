@@ -221,8 +221,10 @@ pub mod pallet {
                     );
                     count
                 }
-                None => 1,
+                None => 0,
             };
+           
+
             Kitties::<T>::insert(kitty_id, Some(Kitty(dna)));
             Owner::<T>::insert(kitty_id, Some(kitty_owner.clone()));
             <KittiesCount<T>>::put(Some(kitty_id + 1));

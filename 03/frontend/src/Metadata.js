@@ -11,6 +11,9 @@ function Main (props) {
     const getMetadata = async () => {
       try {
         const data = await api.rpc.state.getMetadata()
+ 
+       // console.log("Metadata: " + data);
+
         setMetadata({ data, version: data.version })
       } catch (e) {
         console.error(e)
