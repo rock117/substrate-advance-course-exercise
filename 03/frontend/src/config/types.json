@@ -1,4 +1,6 @@
 {
-  "Kitty": "([u8; 16])",
-  "KittyIndex": "u32"
+  "Kitty": {
+    "value": "[u8; 16]"
+},
+  "KittyIndex": "u64"
 }
