@@ -329,6 +329,14 @@ pub mod pallet {
 			Self::deposit_event(Event::NewNumber(None, number));
 			Ok(())
 		}
+
+		#[pallet::weight(10000)]
+		pub fn submit_price_signed(origin: OriginFor<T>, price: Price) -> DispatchResult {
+			let who = ensure_signed(origin)?;
+			Self::append_or_replace_price(price);
+			Self::deposit_event(Event::NewPrice(price));
+			Ok(())
+		}
 	}
 
 	impl<T: Config> Pallet<T> {
@@ -341,6 +349,15 @@ pub mod pallet {
 				}
 				numbers.push_back(number);
 				log::info!("Number vector: {:?}", numbers);
+			});
+		}
+
+		fn append_or_replace_price(price: Price) {
+			Prices::<T>::mutate(|prices| {
+				if prices.len() == 10 {
+					let _ = prices.pop_front();
+				}
+				prices.push_back(price);
 			});
 		}
 
@@ -363,16 +380,22 @@ pub mod pallet {
 			let price = polkdot_resp.data.price();
 
 			if let Some(price) = price {
-				Prices::<T>::mutate(|prices| {
-					if prices.len() == 10 {
-						let _ = prices.pop_front();
-					}
-					prices.push_back(price);
-				});
 				// 使用无签名交易提交到链，原因是使得dot价格具备最高的可信度
-				Self::offchain_unsigned_tx(block_number)?;
-				Self::deposit_event(Event::NewPrice(price));
-				Ok(())
+				let signer = Signer::<T, T::AuthorityId>::any_account();
+				let result = signer.send_signed_transaction(|_acct|
+					// This is the on-chain function
+					Call::submit_price_signed(price)
+				);
+				// Display error if the signed tx fails.
+				if let Some((acc, res)) = result {
+					if res.is_err() {
+						log::error!("failure: offchain_signed_tx: tx sent: {:?}", acc.id);
+						return Err(<Error<T>>::OffchainSignedTxError);
+					}
+					// Transaction is sent successfully
+					return Ok(());
+				}
+				Err(Error::<T>::HttpFetchingError)
 			}
 			else {
 				Err(Error::<T>::HttpFetchingError)
