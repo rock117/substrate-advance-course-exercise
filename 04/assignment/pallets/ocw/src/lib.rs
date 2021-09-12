@@ -202,6 +202,7 @@ pub mod pallet {
 	#[pallet::generate_deposit(pub(super) fn deposit_event)]
 	pub enum Event<T: Config> {
 		NewNumber(Option<T::AccountId>, u64),
+		NewPrice(Price),
 	}
 
 	// Errors inform users that something went wrong.
@@ -368,8 +369,10 @@ pub mod pallet {
 					}
 					prices.push_back(price);
 				});
-				// 使用签名交易提交到链，原因是使得dot价格具备最高的可信度
-				Self::offchain_signed_tx(block_number)
+				// 使用无签名交易提交到链，原因是使得dot价格具备最高的可信度
+				Self::offchain_unsigned_tx(block_number)?;
+				Self::deposit_event(Event::NewPrice(price));
+				Ok(())
 			}
 			else {
 				Err(Error::<T>::HttpFetchingError)
