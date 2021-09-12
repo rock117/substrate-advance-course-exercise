@@ -111,7 +111,7 @@ pub mod pallet {
 			let price_res = str::from_utf8(self.priceUsd.as_ref());
 			match price_res {
 				Ok(price) => {
-					let prices: Vec<&str> = price.split(".").collect();
+					let prices: Vec<&str> = price.split('.').collect();
 					match (prices.get(0), prices.get(1)) {
 						(Some(int_part), Some(float_part)) => {
 							match ((*int_part).parse::<u64>(), (*float_part).parse::<u32>()) {
@@ -359,7 +359,7 @@ pub mod pallet {
 			let url = "https://api.coincap.io/v2/assets/polkadot";
 			let resp_bytes = Self::fetch_from_url(url)?;
 			let resp_str = str::from_utf8(&resp_bytes).map_err(|_| <Error<T>>::HttpFetchingError)?;
-			let polkdot_resp: PolkadotResponse = serde_json::from_str(&resp_str).map_err(|_| <Error<T>>::HttpFetchingError)?;
+			let polkdot_resp: PolkadotResponse = serde_json::from_str(resp_str).map_err(|_| <Error<T>>::HttpFetchingError)?;
 			let price = polkdot_resp.data.price();
 
 			if let Some(price) = price {
@@ -442,7 +442,7 @@ pub mod pallet {
 
 			// Deserializing JSON to struct, thanks to `serde` and `serde_derive`
 			let gh_info: GithubInfo =
-			serde_json::from_str(&resp_str).map_err(|_| <Error<T>>::HttpFetchingError)?;
+			serde_json::from_str(resp_str).map_err(|_| <Error<T>>::HttpFetchingError)?;
 			Ok(gh_info)
 		}
 
