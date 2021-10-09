@@ -5,3 +5,6 @@
 /01/substrate-node-template/.github/workflows/check.yml
 /02/substrate-node-template/pallets/kitties/.idea
 /03/frontend/.yarn/cache/
+/05/erc20/.idea/erc20.iml
+/05/erc20/.idea/
+/05/erc20/.gitignore
